@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frankie Rodriguez — AI-First Product Leadership</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* =========================================================
+     Design tokens — minimal surface
+     ========================================================= */
+  :root {
+    /* Brand */
+    --ld-blue-100: #0053e2;
+    --ld-blue-110: #0040b0;
+    --ld-blue-130: #002e99;
+    --ld-blue-160: #001e60;
+    --ld-blue-surface: #e9f1fe;
+
+    /* Spark */
+    --ld-spark-100: #ffc220;
+    --ld-spark-110: #f0ad00;
+    --ld-spark-140: #995213;
+    --ld-spark-10:  #fef6de;
+
+    /* Status */
+    --ld-red-100:   #ea1100;
+    --ld-green-100: #2a8703;
+
+    /* Neutrals */
+    --ld-white:        #ffffff;
+    --ld-gray-5:       #f8f8f8;   /* bg-subtle */
+    --ld-gray-10:      #f2f2f3;
+    --ld-gray-20:      #e3e4e5;   /* separator */
+    --ld-gray-50:      #cdced0;
+    --ld-gray-100:     #74767c;   /* text-subtlest */
+    --ld-gray-130:     #515357;   /* text-subtle */
+    --ld-gray-160:     #2e2f32;   /* text */
+
+    /* Typography */
+    --ld-font-sans: 'EverydaySans', ui-sans-serif, system-ui, -apple-system,
+                    BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    /* Spacing scale */
+    --ld-space-100: 8px;
+    --ld-space-150: 12px;
+    --ld-space-200: 16px;
+    --ld-space-300: 24px;
+    --ld-space-400: 32px;
+    --ld-space-500: 40px;
+    --ld-space-600: 48px;
+
+    /* Radii */
+    --ld-radius-100: 8px;
+    --ld-radius-200: 12px;
+    --ld-radius-300: 16px;
+    --ld-radius-pill: 1000px;
+
+    /* Elevation */
+    --ld-elevation-100: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --ld-elevation-200: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  }
+
+  /* =========================================================
+     Base
+     ========================================================= */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--ld-font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ld-gray-160);
+    background: var(--ld-gray-5);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  a { color: var(--ld-blue-100); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ld-blue-100);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  strong { font-weight: 700; }
+
+  /* =========================================================
+     Layout
+     ========================================================= */
+  .ld-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--ld-space-400); }
+  .ld-main { padding: var(--ld-space-600) var(--ld-space-400); max-width: 1200px; margin: 0 auto; }
+  .ld-section + .ld-section { margin-top: var(--ld-space-600); }
+
+  /* =========================================================
+     Typography (LD heading scale)
+     ========================================================= */
+  .ld-heading-xl { font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+  .ld-heading-l  { font-size: 32px; line-height: 1.2;  font-weight: 700; letter-spacing: -0.01em; }
+  .ld-heading-m  { font-size: 24px; line-height: 1.25; font-weight: 700; }
+  .ld-heading-s  { font-size: 20px; line-height: 1.3;  font-weight: 700; }
+  .ld-body-l     { font-size: 18px; line-height: 1.55; }
+  .ld-body       { font-size: 16px; line-height: 1.5; }
+  .ld-body-s     { font-size: 14px; line-height: 1.5; }
+  .ld-caption    { font-size: 12px; line-height: 1.4; }
+  .ld-overline {
+    font-size: 12px; line-height: 1.4; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .ld-text-subtle    { color: var(--ld-gray-130); }
+  .ld-text-subtlest  { color: var(--ld-gray-100); }
+  .ld-text-brand     { color: var(--ld-blue-100); }
+  .ld-text-brand-bold{ color: var(--ld-blue-130); }
+  .ld-text-spark     { color: var(--ld-spark-140); }
+
+  /* =========================================================
+     Section title — LD pattern: small spark square + heading-m
+     ========================================================= */
+  .ld-section-title {
+    display: flex; align-items: center; gap: var(--ld-space-200);
+    margin-bottom: var(--ld-space-300);
+  }
+  .ld-section-title__mark {
+    width: 16px; height: 16px;
+    background: var(--ld-spark-100);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* =========================================================
+     Hero
+     ========================================================= */
+  .ld-hero {
+    background: linear-gradient(135deg, var(--ld-blue-100) 0%, var(--ld-blue-160) 100%);
+    color: var(--ld-white);
+    position: relative;
+  }
+  .ld-hero__inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: var(--ld-space-600) var(--ld-space-400);
+  }
+  .ld-hero__grid {
+    display: flex; flex-wrap: wrap; gap: var(--ld-space-400);
+    align-items: flex-start; justify-content: space-between;
+  }
+  .ld-hero__main { flex: 1 1 360px; min-width: 0; }
+  .ld-hero__eyebrow {
+    display: flex; align-items: center; gap: var(--ld-space-150);
+    margin-bottom: var(--ld-space-200);
+  }
+  .ld-hero__eyebrow svg { width: 22px; height: 22px; flex-shrink: 0; }
+  .ld-hero__eyebrow-text {
+    color: var(--ld-spark-100);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .ld-hero h1 {
+    font-size: 48px; line-height: 1.05; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: var(--ld-space-200);
+  }
+  .ld-hero__lede {
+    font-size: 20px; line-height: 1.5; font-weight: 400;
+    color: rgba(255, 255, 255, 0.92);
+    max-width: 64ch; margin-bottom: var(--ld-space-300);
+  }
+  .ld-hero__chips {
+    display: flex; flex-wrap: wrap; gap: var(--ld-space-100);
+    margin-bottom: var(--ld-space-300);
+  }
+  .ld-hero__cta-row {
+    display: flex; flex-wrap: wrap; gap: var(--ld-space-150);
+    align-items: center;
+  }
+  .ld-hero__stats {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--ld-radius-300);
+    padding: var(--ld-space-300);
+    min-width: 260px;
+  }
+  .ld-hero__stats-label {
+    color: var(--ld-spark-100);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: var(--ld-space-200);
+  }
+  .ld-hero__stat { margin-bottom: var(--ld-space-200); }
+  .ld-hero__stat:last-child { margin-bottom: 0; }
+  .ld-hero__stat-value { font-size: 32px; font-weight: 700; line-height: 1.1; }
+  .ld-hero__stat-label { font-size: 14px; color: rgba(255, 255, 255, 0.85); margin-top: 2px; }
+
+  /* Spark accent rule under hero */
+  .ld-hero__rule {
+    height: 4px;
+    background: linear-gradient(90deg,
+      var(--ld-spark-100) 0,
+      var(--ld-spark-100) 80px,
+      transparent 80px);
+  }
+
+  /* =========================================================
+     Cards
+     ========================================================= */
+  .ld-card {
+    background: var(--ld-white);
+    border: 1px solid var(--ld-gray-20);
+    border-radius: var(--ld-radius-200);
+    padding: var(--ld-space-300);
+    box-shadow: var(--ld-elevation-100);
+  }
+  .ld-card--accent { border-left: 4px solid var(--ld-blue-100); }
+  .ld-card--accent-spark { border-left: 4px solid var(--ld-spark-100); }
+  .ld-card--brand {
+    background: var(--ld-blue-100);
+    color: var(--ld-white);
+    border: none;
+  }
+  .ld-card--ink {
+    background: var(--ld-gray-160);
+    color: var(--ld-white);
+    border: none;
+    padding: var(--ld-space-500);
+    border-radius: var(--ld-radius-300);
+  }
+  .ld-card--spark-tint {
+    background: linear-gradient(135deg, var(--ld-spark-10) 0%, var(--ld-white) 70%);
+    border: 1px solid var(--ld-spark-100);
+  }
+  .ld-card--cta {
+    background: var(--ld-white);
+    border: 1px solid var(--ld-blue-100);
+    border-radius: var(--ld-radius-300);
+    padding: var(--ld-space-500);
+    box-shadow: var(--ld-elevation-100);
+  }
+
+  /* Stat callouts inside cards */
+  .ld-stat-large { font-size: 40px; font-weight: 700; line-height: 1.05; color: var(--ld-blue-100); }
+  .ld-stat-large--spark { color: var(--ld-spark-140); }
+  .ld-stat-large--green { color: var(--ld-green-100); }
+  .ld-stat-medium { font-size: 24px; font-weight: 700; line-height: 1.1; color: var(--ld-blue-100); }
+  .ld-stat-medium--spark { color: var(--ld-spark-140); }
+
+  /* =========================================================
+     Grids
+     ========================================================= */
+  .ld-grid { display: grid; gap: var(--ld-space-200); }
+  .ld-grid--2 { grid-template-columns: 1fr; }
+  .ld-grid--3 { grid-template-columns: 1fr; }
+  @media (min-width: 720px) {
+    .ld-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .ld-grid--3 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1040px) {
+    .ld-grid--3 { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* =========================================================
+     Chips (LD)
+     ========================================================= */
+  .ld-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--ld-radius-pill);
+    font-size: 12px; font-weight: 600; line-height: 1.4;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .ld-chip--brand {
+    background: var(--ld-blue-surface);
+    color: var(--ld-blue-130);
+    border-color: var(--ld-blue-surface);
+  }
+  .ld-chip--spark {
+    background: var(--ld-spark-10);
+    color: var(--ld-spark-140);
+    border-color: var(--ld-spark-10);
+  }
+  .ld-chip--on-brand {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--ld-white);
+    border-color: rgba(255, 255, 255, 0.30);
+  }
+
+  /* =========================================================
+     Buttons (LD)
+     ========================================================= */
+  .ld-btn {
+    display: inline-flex; align-items: center; gap: var(--ld-space-100);
+    padding: 12px 20px;
+    border-radius: var(--ld-radius-pill);
+    font-family: inherit;
+    font-size: 14px; font-weight: 700; line-height: 1;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+    text-decoration: none;
+  }
+  .ld-btn:hover { text-decoration: none; }
+  .ld-btn--primary {
+    background: var(--ld-blue-100);
+    color: var(--ld-white);
+    border-color: var(--ld-blue-100);
+  }
+  .ld-btn--primary:hover {
+    background: var(--ld-blue-110);
+    border-color: var(--ld-blue-110);
+  }
+  .ld-btn--secondary {
+    background: var(--ld-white);
+    color: var(--ld-gray-160);
+    border-color: var(--ld-gray-160);
+  }
+  .ld-btn--secondary:hover {
+    background: var(--ld-gray-10);
+  }
+  .ld-btn--on-brand-primary {
+    background: var(--ld-spark-100);
+    color: var(--ld-gray-160);
+    border-color: var(--ld-spark-100);
+  }
+  .ld-btn--on-brand-primary:hover {
+    background: var(--ld-spark-110);
+    border-color: var(--ld-spark-110);
+  }
+  .ld-btn--on-brand-secondary {
+    background: rgba(255, 255, 255, 0.10);
+    color: var(--ld-white);
+    border-color: rgba(255, 255, 255, 0.50);
+  }
+  .ld-btn--on-brand-secondary:hover {
+    background: rgba(255, 255, 255, 0.20);
+  }
+  .ld-btn--sm { padding: 8px 14px; font-size: 13px; }
+
+  /* =========================================================
+     Print toggle button (floating)
+     ========================================================= */
+  .ld-print-fab {
+    position: fixed; top: 16px; right: 16px; z-index: 50;
+    box-shadow: var(--ld-elevation-200);
+  }
+
+  /* =========================================================
+     Table (current focus areas)
+     ========================================================= */
+  .ld-table-wrap {
+    background: var(--ld-white);
+    border: 1px solid var(--ld-gray-20);
+    border-radius: var(--ld-radius-200);
+    overflow: hidden;
+    box-shadow: var(--ld-elevation-100);
+  }
+  .ld-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ld-table thead { background: var(--ld-blue-100); color: var(--ld-white); }
+  .ld-table th {
+    text-align: left; padding: var(--ld-space-150) var(--ld-space-200);
+    font-weight: 700; font-size: 13px;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .ld-table td {
+    padding: var(--ld-space-200);
+    border-top: 1px solid var(--ld-gray-20);
+    vertical-align: top;
+  }
+  .ld-table tbody tr:first-child td { border-top: none; }
+  .ld-table__num {
+    font-size: 20px; font-weight: 700; color: var(--ld-blue-100);
+    width: 40px;
+  }
+  .ld-table__num--spark { color: var(--ld-spark-140); }
+
+  /* =========================================================
+     Tenets list
+     ========================================================= */
+  .ld-tenet { border-left: 3px solid var(--ld-blue-100); padding-left: var(--ld-space-200); }
+  .ld-tenet h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+
+  /* =========================================================
+     Footer
+     ========================================================= */
+  .ld-footer {
+    background: var(--ld-white);
+    border-top: 1px solid var(--ld-gray-20);
+    margin-top: var(--ld-space-600);
+  }
+  .ld-footer__inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: var(--ld-space-300) var(--ld-space-400);
+    display: flex; flex-wrap: wrap; gap: var(--ld-space-100);
+    justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--ld-gray-100);
+  }
+
+  /* =========================================================
+     Utilities
+     ========================================================= */
+  .ld-stack > * + * { margin-top: var(--ld-space-150); }
+  .ld-row { display: flex; flex-wrap: wrap; gap: var(--ld-space-150); align-items: center; }
+  .ld-mt-200 { margin-top: var(--ld-space-200); }
+  .ld-mt-300 { margin-top: var(--ld-space-300); }
+  .ld-mb-100 { margin-bottom: var(--ld-space-100); }
+  .ld-mb-150 { margin-bottom: var(--ld-space-150); }
+  .ld-mb-200 { margin-bottom: var(--ld-space-200); }
+  .ld-mb-300 { margin-bottom: var(--ld-space-300); }
+
+  /* =========================================================
+     Print
+     ========================================================= */
+  @media print {
+    .no-print { display: none !important; }
+    body { font-size: 11px; background: var(--ld-white); }
+    .ld-hero {
+      background: var(--ld-blue-100) !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .ld-card, .ld-table-wrap, .ld-card--cta { box-shadow: none; }
+    section { page-break-inside: avoid; }
+    .ld-main { padding: var(--ld-space-300); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Print FAB -->
+<div class="no-print ld-print-fab">
+  <button onclick="window.print()" class="ld-btn ld-btn--primary" aria-label="Print or save as PDF">
+    Print / Save as PDF
+  </button>
+</div>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<header class="ld-hero" role="banner">
+  <div class="ld-hero__inner">
+    <div class="ld-hero__grid">
+      <div class="ld-hero__main">
+        <div class="ld-hero__eyebrow">
+          <!-- Neutral mark for external portfolio -->
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="22" height="22">
+            <path fill="#FFC220" d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z"/>
+          </svg>
+          <span class="ld-hero__eyebrow-text">Product Leadership · Platform &amp; Partnerships</span>
+        </div>
+        <h1>Frankie Rodriguez</h1>
+        <p class="ld-hero__lede">
+          Product leader pioneering AI-first ways of working across a multi-billion-dollar
+          partnerships and platform portfolio at one of the world's largest retailers.
+        </p>
+        <div class="ld-hero__chips" role="list" aria-label="Focus areas">
+          <span class="ld-chip ld-chip--on-brand" role="listitem">Creator Commerce</span>
+          <span class="ld-chip ld-chip--on-brand" role="listitem">Developer Platform / Commerce APIs</span>
+          <span class="ld-chip ld-chip--on-brand" role="listitem">Agentic Commerce</span>
+          <span class="ld-chip ld-chip--on-brand" role="listitem">Affiliates &amp; Partnerships</span>
+          <span class="ld-chip ld-chip--on-brand" role="listitem">Immersive &amp; New Channels</span>
+        </div>
+        <div class="ld-hero__cta-row">
+          <a href="mailto:fjrodriguezpr@gmail.com"
+             class="ld-btn ld-btn--on-brand-primary"
+             aria-label="Email Frankie">
+            fjrodriguezpr@gmail.com
+          </a>
+          <a href="https://www.linkedin.com/in/fjrodriguezpr/"
+             target="_blank" rel="noopener"
+             class="ld-btn ld-btn--on-brand-secondary"
+             aria-label="LinkedIn profile">
+            linkedin.com/in/fjrodriguezpr
+          </a>
+        </div>
+      </div>
+      <aside class="ld-hero__stats" aria-label="Span of control summary">
+        <div class="ld-hero__stats-label">Span of Leadership</div>
+        <div class="ld-hero__stat">
+          <div class="ld-hero__stat-value">Multi-$B</div>
+          <div class="ld-hero__stat-label">Established partnerships GMV under management</div>
+        </div>
+        <div class="ld-hero__stat">
+          <div class="ld-hero__stat-value">$B+</div>
+          <div class="ld-hero__stat-label">Net-new growth opportunity in build</div>
+        </div>
+        <div class="ld-hero__stat">
+          <div class="ld-hero__stat-value">3</div>
+          <div class="ld-hero__stat-label">Banners across two countries</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <div class="ld-hero__rule" aria-hidden="true"></div>
+</header>
+
+<main class="ld-main">
+
+  <!-- =========================================================
+       EXEC SUMMARY
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="exec-summary">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="exec-summary" class="ld-heading-m">Executive Summary</h2>
+    </div>
+    <div class="ld-card">
+      <p class="ld-body-l ld-text-subtle">
+        I lead product strategy and execution for a global retailer's <strong>Platform &amp; Partnerships</strong> portfolio
+        &mdash; a multi-billion-dollar surface area spanning a <strong class="ld-text-brand-bold">global affiliates program</strong>,
+        a <strong class="ld-text-brand-bold">health &amp; wellness directed-spend platform</strong>,
+        a <strong class="ld-text-brand-bold">global creator commerce program</strong>, and a
+        <strong class="ld-text-brand-bold">developer-facing Commerce API platform</strong>; I also supported emerging
+        <strong class="ld-text-brand-bold">agentic commerce</strong> integrations with leading LLM platforms. Over the last
+        fiscal cycle I operationalized an <strong>AI-first way of working</strong> across my team &mdash; moving from 50% AI-assisted
+        work to a 60%+ target &mdash; and personally shipped a body of AI-accelerated artifacts (PRDs, prototypes,
+        dashboards, executive briefings, a production-grade React Native mobile app, and a developer portal with an
+        LLM-powered chatbot) that would historically have required multiple engineering sprints each. This document is a
+        snapshot of that scope, that span of leadership, and the AI-first leverage that makes it possible.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCOPE GRID
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="scope">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="scope" class="ld-heading-m">Scope &amp; Programs Under Management</h2>
+    </div>
+    <div class="ld-grid ld-grid--3">
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">Affiliates Platform</div>
+        <h3 class="ld-heading-s ld-mb-150">Global Affiliates Program</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Owns the partner ecosystem driving discovery and conversion via public OpenAPIs and on-platform delivery integrations, with international expansion in flight.</p>
+        <div class="ld-stat-medium">Multi-$B</div>
+        <div class="ld-caption ld-text-subtlest">GMV under management</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">Health &amp; Wellness</div>
+        <h3 class="ld-heading-s ld-mb-150">Directed Spend</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Platform integrations powering directed health &amp; wellness benefits commerce with leading third-party partners.</p>
+        <div class="ld-stat-medium">Growth</div>
+        <div class="ld-caption ld-text-subtlest">Strategic surface in build</div>
+      </article>
+
+      <article class="ld-card ld-card--accent-spark">
+        <div class="ld-overline ld-text-spark ld-mb-100">Transformational</div>
+        <h3 class="ld-heading-s ld-mb-150">Agentic Commerce — LLM Integrations</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Production-grade integrations bringing retail commerce inside leading LLM-native shopping experiences. One of the largest re-platforming bets of the year.</p>
+        <div class="ld-stat-medium ld-stat-medium--spark">$M→$B</div>
+        <div class="ld-caption ld-text-subtlest">Net-new annual GMV trajectory</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">Multi-Banner</div>
+        <h3 class="ld-heading-s ld-mb-150">Global Creator Program</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Unified creator commerce across multiple banners, with the first international expansion shipping this year.</p>
+        <div class="ld-stat-medium">25%+</div>
+        <div class="ld-caption ld-text-subtlest">YoY active creator growth target</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">0→1 Build</div>
+        <h3 class="ld-heading-s ld-mb-150">Creator Mobile App</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Native iOS + Android creator experience. High-fidelity React Native prototype already shipped via AI-paired prototyping; production in plan for this fiscal year.</p>
+        <div class="ld-stat-medium">≥4.3★</div>
+        <div class="ld-caption ld-text-subtlest">Quality target</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">Developer Platform</div>
+        <h3 class="ld-heading-s ld-mb-150">Commerce APIs</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Multi-program platform: developer-portal migration, self-service tools, international expansion, native commerce experiences, membership acquisition, on-platform delivery, MCP architecture, and metrics.</p>
+        <div class="ld-stat-medium">$B+</div>
+        <div class="ld-caption ld-text-subtlest">Combined annual GMV opportunity</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">On-Platform Delivery</div>
+        <h3 class="ld-heading-s ld-mb-150">OPD via Commerce APIs</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Production delivery support extended across agentic integrations.</p>
+        <div class="ld-stat-medium">2× YoY</div>
+        <div class="ld-caption ld-text-subtlest">Year 1 → Year 2 GMV growth</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">Membership Acquisition</div>
+        <h3 class="ld-heading-s ld-mb-150">Membership APIs in Agentic Checkout</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Standardized membership opt-in inside 3P agent checkout flows — driving membership at the moment of purchase intent.</p>
+        <div class="ld-stat-medium">6-figure</div>
+        <div class="ld-caption ld-text-subtlest">Net-new annual member acquisition</div>
+      </article>
+
+      <article class="ld-card ld-card--accent">
+        <div class="ld-overline ld-text-brand ld-mb-100">New Channels</div>
+        <h3 class="ld-heading-s ld-mb-150">Immersive Commerce</h3>
+        <p class="ld-body-s ld-text-subtle ld-mb-200">Shoppable ads SDK partnerships plus mobile-game affiliate scaling globally — a strategic bet on in-game shoppable discovery.</p>
+        <div class="ld-stat-medium">3+</div>
+        <div class="ld-caption ld-text-subtlest">Live partner campaigns in year</div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FINANCIAL IMPACT (chart) — $B scale, no exact figures
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="impact">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="impact" class="ld-heading-m">Financial Impact</h2>
+    </div>
+    <div class="ld-card">
+      <p class="ld-body-s ld-text-subtle ld-mb-300">Approximate GMV scale (in $B) across the programs I directly manage or co-own. Affiliates is the established multi-billion-dollar run-the-business; Commerce APIs, OPD, and Agentic Commerce are the growth engines, each on a $B-scale trajectory.</p>
+      <div style="height: 320px; position: relative;">
+        <canvas id="gmvChart" aria-label="Bar chart of approximate GMV footprint by program, in billions of dollars"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       LEADERSHIP NARRATIVE
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="why-it-matters">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="why-it-matters" class="ld-heading-m">Why This Matters</h2>
+    </div>
+    <div class="ld-grid ld-grid--3">
+      <div class="ld-card ld-card--brand">
+        <div style="color:var(--ld-spark-100);font-size:32px;font-weight:700;line-height:1;margin-bottom:var(--ld-space-150);">1</div>
+        <h3 class="ld-heading-s ld-mb-150">Defending the Customer Relationship in the Agent Era</h3>
+        <p class="ld-body-s" style="color:rgba(255,255,255,0.92);">Authored the durable guardrails ensuring a major retailer never trades reach for disintermediation as commerce shifts to agent-to-agent surfaces.</p>
+      </div>
+      <div class="ld-card ld-card--brand">
+        <div style="color:var(--ld-spark-100);font-size:32px;font-weight:700;line-height:1;margin-bottom:var(--ld-space-150);">2</div>
+        <h3 class="ld-heading-s ld-mb-150">Compounding Velocity Through AI</h3>
+        <p class="ld-body-s" style="color:rgba(255,255,255,0.92);">Built reproducible AI-paired prototyping methods now used across squads — the leverage compounds beyond my own team.</p>
+      </div>
+      <div class="ld-card ld-card--brand">
+        <div style="color:var(--ld-spark-100);font-size:32px;font-weight:700;line-height:1;margin-bottom:var(--ld-space-150);">3</div>
+        <h3 class="ld-heading-s ld-mb-150">Multi-Surface, Multi-Banner Scale</h3>
+        <p class="ld-body-s" style="color:rgba(255,255,255,0.92);">From a multi-billion-dollar established affiliate revenue base to a 0→1 mobile app to net-new agentic GMV — the portfolio spans run-the-business and change-the-business simultaneously.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       IMPACT METRICS — AI adoption stat row
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="impact-metrics">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="impact-metrics" class="ld-heading-m">Impact Metrics — AI Adoption</h2>
+    </div>
+    <div class="ld-grid ld-grid--3">
+      <div class="ld-card">
+        <div class="ld-overline ld-text-subtlest ld-mb-150">Prior-year baseline</div>
+        <div class="ld-stat-large">50%</div>
+        <p class="ld-body-s ld-text-subtle ld-mt-200">of team work AI-assisted — already top-decile across the organization</p>
+      </div>
+      <div class="ld-card ld-card--spark-tint">
+        <div class="ld-overline ld-text-spark ld-mb-150">Current-year target</div>
+        <div class="ld-stat-large ld-stat-large--spark">60%+</div>
+        <p class="ld-body-s ld-text-subtle ld-mt-200">team-wide AI-assisted work, with 100% of new initiatives kicking off with an AI-accelerated prototype phase</p>
+      </div>
+      <div class="ld-card">
+        <div class="ld-overline ld-text-subtlest ld-mb-150">Velocity Gain</div>
+        <div class="ld-stat-large ld-stat-large--green">≥20%</div>
+        <p class="ld-body-s ld-text-subtle ld-mt-200">reduction in prototype-to-production cycle time vs. prior-year baseline</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       AI FORCE MULTIPLIER — How I use AI
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="ai-force-multiplier">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="ai-force-multiplier" class="ld-heading-m">AI as a Force Multiplier</h2>
+    </div>
+    <div class="ld-card">
+      <p class="ld-body ld-text-subtle ld-mb-300">How AI shows up across the operating cadence — strategy, prototyping, executive comms, and team enablement.</p>
+      <div class="ld-grid ld-grid--2">
+        <div>
+          <div class="ld-body-s" style="font-weight:700;color:var(--ld-blue-130);margin-bottom:4px;">Strategy &amp; Authoring</div>
+          <p class="ld-body-s ld-text-subtle">Drafted and iterated a set of <strong>Agentic Commerce Tenets</strong> (4 tenets, multiple stakeholder rounds, in active executive review) and an <strong>A2A API Tenets</strong> framework &mdash; using AI as a sparring partner for principle stress-testing.</p>
+        </div>
+        <div>
+          <div class="ld-body-s" style="font-weight:700;color:var(--ld-blue-130);margin-bottom:4px;">Prototype-to-Product</div>
+          <p class="ld-body-s ld-text-subtle">Authored an internal <strong>AI-paired prototyping playbook</strong> &mdash; a repeatable methodology now used across squads for going from PRD to interactive prototype in days, not sprints.</p>
+        </div>
+        <div>
+          <div class="ld-body-s" style="font-weight:700;color:var(--ld-blue-130);margin-bottom:4px;">Executive Communication</div>
+          <p class="ld-body-s ld-text-subtle">Generated <strong>30+ stakeholder-ready HTML reports, dashboards, and briefings</strong> &mdash; daily briefings, weekly readouts, deployment readiness assessments, partner pricing analyses, validation reports &mdash; all from raw data and meeting context.</p>
+        </div>
+        <div>
+          <div class="ld-body-s" style="font-weight:700;color:var(--ld-blue-130);margin-bottom:4px;">Team Enablement</div>
+          <p class="ld-body-s ld-text-subtle">Built an internal <strong>AI-PM onboarding guide</strong> &mdash; a knowledge asset that levels up every PM on the team to use AI agents productively, with personalized onboarding kits for each new hire.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       THOUGHT LEADERSHIP
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="thought-leadership">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="thought-leadership" class="ld-heading-m">Strategic Authorship &amp; Thought Leadership</h2>
+    </div>
+    <div class="ld-card">
+      <p class="ld-body ld-text-subtle ld-mb-300">Authored the durable decision-making frameworks that govern how a major retailer participates in agentic commerce — work adopted across Partnerships, Privacy, Legal, and Engineering teams.</p>
+      <div class="ld-grid ld-grid--2">
+        <div class="ld-tenet">
+          <h3>Platform Partnership &amp; Agentic Commerce Tenets</h3>
+          <p class="ld-body-s ld-text-subtle"><strong>4 tenets</strong> defining how the company safely participates in agent-driven shopping. Drafted and iterated through multiple stakeholder rounds with executive feedback.</p>
+          <ul class="ld-mt-200" style="list-style:none;padding:0;margin:0;">
+            <li class="ld-caption ld-text-subtlest" style="margin-bottom:4px;">1 &middot; Customer trust as a non-negotiable foundation</li>
+            <li class="ld-caption ld-text-subtlest" style="margin-bottom:4px;">2 &middot; Retailer owns the transaction end-to-end</li>
+            <li class="ld-caption ld-text-subtlest" style="margin-bottom:4px;">3 &middot; Agents are welcome with clear accountability</li>
+            <li class="ld-caption ld-text-subtlest">4 &middot; Third-party platforms are opportunities, not dependencies</li>
+          </ul>
+        </div>
+        <div class="ld-tenet">
+          <h3>Agent-to-Agent API Tenets</h3>
+          <p class="ld-body-s ld-text-subtle">Defines the agent-to-agent contract surface for Commerce APIs &mdash; how external agents identify, authenticate, and operate on behalf of users.</p>
+        </div>
+        <div class="ld-tenet">
+          <h3>Platform Partnerships — Strategy &amp; Principles</h3>
+          <p class="ld-body-s ld-text-subtle">The strategic doctrine governing how the company engages with major external platforms without disintermediation.</p>
+        </div>
+        <div class="ld-tenet">
+          <h3>Global Creator Platform Strategy</h3>
+          <p class="ld-body-s ld-text-subtle">Multi-tenancy design for unified creator commerce across banners and geos — the basis for current banner and international expansions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       AI-BUILT ARTIFACTS
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="artifacts">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="artifacts" class="ld-heading-m">AI-Accelerated Build Portfolio</h2>
+    </div>
+
+    <div class="ld-grid ld-grid--2">
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">React Native</span>
+          <span class="ld-chip ld-chip--brand">Expo · TypeScript</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Creator &amp; Affiliate Mobile App Prototype</h3>
+        <p class="ld-body-s ld-text-subtle">High-fidelity, multi-market creator app built on the corporate design system, with a mock state engine and a hidden Developer Debug Menu for stakeholder demos. Includes a built APK. Shipped in days via AI-paired prototyping.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">HTML &middot; HTMX &middot; Tailwind</span>
+          <span class="ld-chip ld-chip--spark">Deployed to AI sandbox</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Commerce API Developer Portal + LLM Chatbot</h3>
+        <p class="ld-body-s ld-text-subtle">Prototype for a developer portal migration, including an <strong>LLM-powered support chatbot</strong> for Commerce API and integration questions. Deployed live to the internal AI innovation sandbox — validating the IA, chatbot UX, and deployment path before production engineering investment.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">Python · python-pptx</span>
+          <span class="ld-chip ld-chip--brand">5 generators</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Tenets Deck Generators</h3>
+        <p class="ld-body-s ld-text-subtle">Custom Python scripts to programmatically generate executive PowerPoints for each tenet iteration — keeping deck and doc in lockstep across reviews. Includes multiple visual treatments tuned for different audience contexts.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">Documentation</span>
+          <span class="ld-chip ld-chip--brand">Methodology</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">AI-Paired Prototyping Playbook</h3>
+        <p class="ld-body-s ld-text-subtle">A codified, repeatable process for AI-paired prototyping — design system first, mock state engine, debug menu, offline-first assets. Reusable across the org.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">Reports · 30+</span>
+          <span class="ld-chip ld-chip--brand">Chart.js</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Executive Reporting Suite</h3>
+        <p class="ld-body-s ld-text-subtle">Multi-version roadmap decks, partner-issues dashboards, deployment readiness assessments, external-integrations workshop prep, partner context briefs, pricing analyses, GTM gap analyses, walkthrough readouts, international launch plans, and a daily / weekly briefing cadence.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">Slack Bots</span>
+          <span class="ld-chip ld-chip--brand">AI Agents</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Slack Agents &amp; Workflow Bots</h3>
+        <p class="ld-body-s ld-text-subtle">Internal agentic tools that surface partner status, briefings, and team signals into Slack — reducing manual reporting overhead for the team.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">Python</span>
+          <span class="ld-chip ld-chip--brand">Wiki API</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">Documentation Automation Scripts</h3>
+        <p class="ld-body-s ld-text-subtle">Programmatic wiki updates for global platform tracking — eliminating manual page maintenance across GTM trackers, foundations tables, and roadmap pages.</p>
+      </article>
+
+      <article class="ld-card">
+        <div class="ld-row ld-mb-150">
+          <span class="ld-chip ld-chip--brand">PRDs</span>
+          <span class="ld-chip ld-chip--brand">Validation</span>
+        </div>
+        <h3 class="ld-heading-s ld-mb-150">PRD &amp; Validation Pipeline</h3>
+        <p class="ld-body-s ld-text-subtle">Authored PRDs across global catalog optionality, unified accounts &amp; login, brand safety, identity, payments, and international localization — paired with AI-generated cross-validation reports.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FOCUS AREAS (annual objectives, abstracted)
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="fy27">
+    <div class="ld-section-title">
+      <span class="ld-section-title__mark" aria-hidden="true"></span>
+      <h2 id="fy27" class="ld-heading-m">Current Focus Areas</h2>
+    </div>
+    <div class="ld-table-wrap">
+      <table class="ld-table" role="table">
+        <thead>
+          <tr>
+            <th scope="col" style="width:48px;">#</th>
+            <th scope="col">Objective</th>
+            <th scope="col">Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ld-table__num">1</td>
+            <td><strong>Launch the Global Creator Program</strong><br><span class="ld-caption ld-text-subtlest">Unified multi-banner creator commerce + first international expansion</span></td>
+            <td class="ld-text-subtle">Double-digit YoY active-creator growth · materially faster onboarding</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num">2</td>
+            <td><strong>Ship the Creator Mobile App (0→1)</strong><br><span class="ld-caption ld-text-subtlest">Native iOS + Android, production this fiscal year</span></td>
+            <td class="ld-text-subtle">High app-store quality bar · strong onboarding completion · broad adoption</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num">3</td>
+            <td><strong>Scale Global Commerce APIs</strong><br><span class="ld-caption ld-text-subtlest">Multi-program platform spanning agentic, on-platform delivery, international, MCP</span></td>
+            <td class="ld-text-subtle"><strong class="ld-text-brand-bold">$B+ annual GMV opportunity</strong> · 6-figure net-new membership acquisition</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num">4</td>
+            <td><strong>Affiliates Platform Excellence</strong><br><span class="ld-caption ld-text-subtlest">Docs migration, self-service, tiered rate limits, metrics</span></td>
+            <td class="ld-text-subtle">Materially lower support load · measurable partner tier upgrades</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num">5</td>
+            <td><strong>Immersive Commerce</strong><br><span class="ld-caption ld-text-subtlest">Shoppable ads partnerships + in-game commerce scaling</span></td>
+            <td class="ld-text-subtle">Multiple live partner campaigns · double-digit GMV growth from in-game channels</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num">6</td>
+            <td><strong>Global Affiliates Strategy</strong><br><span class="ld-caption ld-text-subtlest">Comprehensive multi-country assessment + multi-year roadmap</span></td>
+            <td class="ld-text-subtle">Multiple international expansion opportunities with business cases</td>
+          </tr>
+          <tr>
+            <td class="ld-table__num ld-table__num--spark">7</td>
+            <td><strong>AI-First Ways of Working</strong><br><span class="ld-caption ld-text-subtlest">Prototype-to-Product playbook · team-wide AI adoption</span></td>
+            <td class="ld-text-subtle"><strong class="ld-text-spark">≥60% AI-assisted work</strong> · measurably faster proto→prod · high team satisfaction</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       BOTTOM LINE
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="closing">
+    <div class="ld-card ld-card--ink">
+      <h2 id="closing" class="ld-heading-m ld-mb-200" style="color:var(--ld-white);">
+        <span style="color:var(--ld-spark-100);">●</span> The Bottom Line
+      </h2>
+      <p class="ld-body-l" style="color:#e3e4e5;">
+        My span of leadership covers a <strong style="color:var(--ld-white);">multi-billion-dollar established affiliate revenue base</strong>,
+        with plans to add <strong style="color:var(--ld-white);">$B+ in Commerce API growth</strong>, a
+        <strong style="color:var(--ld-white);">$M→$B agentic commerce trajectory</strong>, and a
+        <strong style="color:var(--ld-white);">2× YoY on-platform delivery ramp</strong>
+        &mdash; all while standing up a creator mobile app from zero, expanding internationally, scaling
+        immersive commerce, defining the principles by which a major retailer engages with the LLM-native commerce ecosystem, shipping
+        AI-paired prototypes into an internal innovation sandbox, and operationalizing an AI-first culture that has already pushed the team to
+        <strong style="color:var(--ld-spark-100);">60%+ AI-assisted work</strong>.
+        This is platform-scale impact delivered at startup-speed leverage.
+      </p>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       REACH ME
+       ========================================================= -->
+  <section class="ld-section" aria-labelledby="reach-me">
+    <div class="ld-card--cta">
+      <div class="ld-section-title">
+        <span class="ld-section-title__mark" aria-hidden="true"></span>
+        <h2 id="reach-me" class="ld-heading-m">Reach Me</h2>
+      </div>
+      <p class="ld-body ld-text-subtle ld-mb-300">If anything here sparked a thought, I&rsquo;d love to hear from you. Always up for a conversation about agentic commerce, the AI-PM operating model, or what comes next.</p>
+      <div class="ld-row">
+        <a href="mailto:fjrodriguezpr@gmail.com" class="ld-btn ld-btn--primary">
+          fjrodriguezpr@gmail.com
+        </a>
+        <a href="https://www.linkedin.com/in/fjrodriguezpr/" target="_blank" rel="noopener" class="ld-btn ld-btn--secondary">
+          linkedin.com/in/fjrodriguezpr
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="ld-footer" role="contentinfo">
+  <div class="ld-footer__inner">
+    <div>Frankie Rodriguez · Product Leadership Profile</div>
+    <div><span id="ld-date"></span></div>
+  </div>
+</footer>
+
+<script>
+  // Inject date (safe textContent — no innerHTML rewrite)
+  document.getElementById('ld-date').textContent =
+    new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  // GMV Chart — LD-aligned palette
+  const ctx = document.getElementById('gmvChart');
+  if (ctx && window.Chart) {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [
+          'Affiliates\n(run-the-business)',
+          'Commerce APIs\n(growth potential)',
+          'OPD Year 1',
+          'OPD Year 2',
+          'Agentic Commerce'
+        ],
+        datasets: [{
+          label: 'GMV ($B)',
+          data: [7.0, 1.0, 0.3, 0.6, 0.5],
+          backgroundColor: ['#002e99', '#0053e2', '#114ab6', '#114ab6', '#995213'],
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c) => `$B-scale annual GMV` } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Annual GMV ($B)', font: { weight: '700' } },
+            grid: { color: '#e3e4e5' },
+            ticks: { display: false }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
